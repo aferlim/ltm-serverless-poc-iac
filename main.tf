@@ -11,18 +11,6 @@ resource "azurerm_storage_account" "static_website" {
     index_document     = "index.html"
     error_404_document = "error.html"
   }
-
-  #   provisioner "local-exec" {
-  #     command = <<EOF
-  #       az extension add --name storage-preview
-  #       az storage blob service-properties update \
-  #       --subscription "${var.AzSubscriptionId}" \
-  #       --account-name "${var.POC_StaticFile_Name}" \
-  #       --static-website \
-  #       --404-document 404.html \
-  #       --index-document index.html
-  #       EOF
-  #   }
 }
 
 
@@ -42,7 +30,7 @@ resource "azurerm_signalr_service" "serverless_signalr" {
 
   features {
     flag  = "ServiceMode"
-    value = "Default"
+    value = "Serverless"
   }
 }
 
