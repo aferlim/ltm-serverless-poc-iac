@@ -20,8 +20,8 @@ resource "azurerm_signalr_service" "serverless_signalr" {
   resource_group_name = azurerm_resource_group.serverless-group.name
 
   sku {
-    name     = "Free_F1"
-    capacity = 1
+    name     = "Standard_S1"
+    capacity = 2
   }
 
   cors {
