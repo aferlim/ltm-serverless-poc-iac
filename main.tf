@@ -13,7 +13,6 @@ resource "azurerm_storage_account" "static_website" {
   }
 }
 
-
 resource "azurerm_signalr_service" "serverless_signalr" {
   name                = "serverlesspoc-signalr"
   location            = azurerm_resource_group.serverless-group.location
@@ -55,9 +54,16 @@ resource "azurerm_app_service_plan" "serverless_plan" {
 }
 
 resource "azurerm_function_app" "vote_function" {
+  version                   = "~2"
   name                      = "votepoc"
   location                  = azurerm_resource_group.serverless-group.location
   resource_group_name       = azurerm_resource_group.serverless-group.name
   app_service_plan_id       = azurerm_app_service_plan.serverless_plan.id
   storage_connection_string = azurerm_storage_account.function_storage.primary_connection_string
+
+  app_settings = {
+    "AzureSignalRConnectionString" : azurerm_signalr_service.serverless_signalr.primary_connection_string
+    "WEBSITE_ENABLE_SYNC_UPDATE_SITE" : "true"
+    "WEBSITE_RUN_FROM_PACKAGE" : "1"
+  }
 }
