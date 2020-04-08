@@ -31,6 +31,11 @@ resource "azurerm_signalr_service" "serverless_signalr" {
     flag  = "ServiceMode"
     value = "Serverless"
   }
+
+  features {
+    flag  = "EnableConnectivityLogs"
+    value = "True"
+  }
 }
 
 resource "azurerm_storage_account" "function_storage" {
@@ -48,8 +53,8 @@ resource "azurerm_app_service_plan" "serverless_plan" {
   resource_group_name = azurerm_resource_group.serverless-group.name
 
   sku {
-    tier = "Standard"
-    size = "S1"
+    tier = "Basic"
+    size = "B1"
   }
 }
 
@@ -65,5 +70,12 @@ resource "azurerm_function_app" "vote_function" {
     "AzureSignalRConnectionString" : azurerm_signalr_service.serverless_signalr.primary_connection_string
     "WEBSITE_ENABLE_SYNC_UPDATE_SITE" : "true"
     "WEBSITE_RUN_FROM_PACKAGE" : "1"
+  }
+
+  site_config {
+    cors {
+      allowed_origins     = ["*"]
+      support_credentials = false
+    }
   }
 }
