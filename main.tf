@@ -58,6 +58,14 @@ resource "azurerm_app_service_plan" "serverless_plan" {
   }
 }
 
+resource "azurerm_application_insights" "application_insights" {
+  name                = "serverless-appInsights"
+  location            = azurerm_resource_group.serverless-group.location
+  resource_group_name = azurerm_resource_group.serverless-group.name
+  application_type    = "web"
+}
+
+
 resource "azurerm_function_app" "vote_function" {
   version                   = "~2"
   name                      = "votepoc"
@@ -70,6 +78,7 @@ resource "azurerm_function_app" "vote_function" {
     "AzureSignalRConnectionString" : azurerm_signalr_service.serverless_signalr.primary_connection_string
     "WEBSITE_ENABLE_SYNC_UPDATE_SITE" : "true"
     "WEBSITE_RUN_FROM_PACKAGE" : "1"
+    "APPINSIGHTS_INSTRUMENTATIONKEY" : azurerm_application_insights.application_insights.instrumentation_key
   }
 
   site_config {
