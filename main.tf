@@ -38,12 +38,21 @@ resource "azurerm_signalr_service" "serverless_signalr" {
   }
 }
 
-resource "azurerm_storage_account" "function_storage" {
-  name                     = "votepocstorage"
-  location                 = azurerm_resource_group.serverless-group.location
-  resource_group_name      = azurerm_resource_group.serverless-group.name
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
+# resource "azurerm_storage_account" "function_storage" {
+#   name                     = "votepocstorage"
+#   location                 = azurerm_resource_group.serverless-group.location
+#   resource_group_name      = azurerm_resource_group.serverless-group.name
+#   account_tier             = "Standard"
+#   account_replication_type = "LRS"
+# }
+
+module "storage_account_function" {
+  source = "./modules/account-storage"
+
+  storage_function_name           = "votepocstorage"
+  storage_function_location       = azurerm_resource_group.serverless-group.location
+  storage_function_resource_group = azurerm_resource_group.serverless-group.name
+
 }
 
 
@@ -51,10 +60,11 @@ resource "azurerm_app_service_plan" "serverless_plan" {
   name                = "serverlessplan"
   location            = azurerm_resource_group.serverless-group.location
   resource_group_name = azurerm_resource_group.serverless-group.name
+  kind                = "FunctionApp"
 
   sku {
-    tier = "Basic"
-    size = "B1"
+    tier = "Dynamic"
+    size = "Y1"
   }
 }
 
@@ -72,7 +82,7 @@ resource "azurerm_function_app" "vote_function" {
   location                  = azurerm_resource_group.serverless-group.location
   resource_group_name       = azurerm_resource_group.serverless-group.name
   app_service_plan_id       = azurerm_app_service_plan.serverless_plan.id
-  storage_connection_string = azurerm_storage_account.function_storage.primary_connection_string
+  storage_connection_string = module.storage_account_function.primary_connection_string
 
   app_settings = {
     "AzureSignalRConnectionString" : azurerm_signalr_service.serverless_signalr.primary_connection_string
@@ -87,4 +97,10 @@ resource "azurerm_function_app" "vote_function" {
       support_credentials = false
     }
   }
+}
+
+
+data "azurerm_storage_account" "cloudshell" {
+  name                = "cs2100300009a1a5d12"
+  resource_group_name = "cloud-shell-storage-eastus"
 }
